@@ -3,9 +3,6 @@ package org.example;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Scanner;
 
 public class Producer implements Runnable {
@@ -22,7 +19,7 @@ public class Producer implements Runnable {
         Scanner messageScanner=new Scanner(System.in);
         String message=messageScanner.nextLine();
 
-        producer.send(new ProducerRecord<String,String>(topic,null,message));
+        producer.send(new ProducerRecord<>(topic,null,message));
         producer.close();
 
 

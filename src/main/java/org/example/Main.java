@@ -1,8 +1,5 @@
 package org.example;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.Objects;
+
 import java.util.Properties;
 
 
@@ -10,7 +7,7 @@ import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import java.util.Properties;
+
 
 class Main  {
     public static void main(String[] args)  {

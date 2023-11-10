@@ -1,30 +1,26 @@
 package org.example;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.util.Collections;
+import java.util.Properties;
 
-public class Consumer implements Runnable {
-    private final KafkaConsumer<String, String> consumer;
-    private final String topic;
+public class Consumer {
+    private static final KafkaConsumer<String, String> consumer = createConsumer();
 
-    public Consumer(KafkaConsumer<String, String> consumer, String topic) {
-        this.consumer = consumer;
-        this.topic = topic;
+    private Consumer() {
     }
 
-    @Override
-    public void run() {
-        consumer.subscribe(Collections.singleton(topic));
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(100);
-            for (ConsumerRecord<String, String> record : records)
+    public static KafkaConsumer<String, String> getInstance(){
+        return consumer;
+    }
 
-                // print the offset,key and value for the consumer records.
-                System.out.printf("offset = %d, key = %s, value = %s\n",
-                        record.offset(), record.key(), record.value());
-        }
+    private static KafkaConsumer<String, String> createConsumer() {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", Config.BOOTSTRAP_SERVER_IP + ":" + Config.BOOTSTRAP_SERVER_PORT);
+        props.put("group.id", "test-group");
+        props.put("key.deserializer", StringDeserializer.class.getName());
+        props.put("value.deserializer", StringDeserializer.class.getName());
+        return new KafkaConsumer<>(props);
     }
 }

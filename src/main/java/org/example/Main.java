@@ -8,6 +8,10 @@ class Main {
     public static void main(String[] args) {
         citesteArgumente(args);
 
+        /*
+        Thread consumerThread = new ConsumerThread();
+        consumerThread.start();
+*/
         Scanner scanner = new Scanner(System.in);
         Interpretor interpretor = new Interpretor();
 
@@ -18,8 +22,6 @@ class Main {
             interpretor.interpreteaza(sir);
         } while (!sir.equals("bye"));
 
-        Producer.getInstance().close();
-        Consumer.getInstance().close();
     }
 
     private static void citesteArgumente(String[] args) {

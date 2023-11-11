@@ -6,17 +6,18 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
-import java.util.Collections;
+import java.time.Duration;
 
 public class Interpretor {
     public Interpretor() {
     }
-    public void interpreteaza(String sir){
+
+    public void interpreteaza(String sir) {
         String[] splitString = sir.split(" ");
 
         String comanda = splitString[0];
 
-        switch (comanda){
+        switch (comanda) {
             case "trimite":
                 handleTrimite(splitString);
                 break;
@@ -28,35 +29,42 @@ public class Interpretor {
         }
     }
 
-    private void handleTrimite(String[] splitString){
+    private void handleTrimite(String[] splitString) {
         String topic = splitString[1];
         String continut = splitString[2];
-        KafkaProducer<String, String> producer = Producer.getInstance();
-        producer.send(new ProducerRecord<>(topic,null, continut));
-        producer.flush();
+        Producer producer = new Producer();
+        KafkaProducer<String, String> kafkaProducer = producer.getKafkaProducer();
+        kafkaProducer.send(new ProducerRecord<>(topic, null, continut));
+        kafkaProducer.flush();
+        kafkaProducer.close();
     }
 
-    private void handleAfiseaza(String[] splitString){
+    private void handleAfiseaza(String[] splitString) {
         String topic = splitString[1];
-        String arg2 = splitString[2];
 
-        KafkaConsumer<String, String> consumer = Consumer.getInstance();
-        //consumer.subscribe(Collections.singleton(topic));
+        Consumer consumer = new Consumer();
+        consumer.assignPartitions(topic);
+        KafkaConsumer<String, String> kafkaConsumer = consumer.getKafkaConsumer();
 
-        if (arg2.equals("toate")){
-            consumer.seekToBeginning(consumer.assignment());
-            ConsumerRecords<String, String> records = consumer.poll(1000);
-            for (ConsumerRecord<String, String> record : records)
-                // print the offset,key and value for the consumer records.
-                System.out.printf("offset = %d, key = %s, value = %s\n",
-                        record.offset(), record.key(), record.value());
+        //autocomit = false
+//        Set<TopicPartition> assignedPartitions = kafkaConsumer.assignment();
+//        kafkaConsumer.seekToBeginning(assignedPartitions);
+
+        ConsumerRecords<String, String> records = kafkaConsumer.poll(Duration.ofMillis(100));
+
+        for (ConsumerRecord<String, String> record : records) {
+            System.out.printf("offset = %d, key = %s, value = %s\n",
+                    record.offset(), record.key(), record.value());
         }
-        else {
-            ConsumerRecords<String, String> records = consumer.poll(1000);
-            for (ConsumerRecord<String, String> record : records)
-                // print the offset,key and value for the consumer records.
-                System.out.printf("offset = %d, key = %s, value = %s\n",
-                        record.offset(), record.key(), record.value());
-        }
+
+        kafkaConsumer.close();
+
+//        List<ConsumerRecord<String, String>> records = ConsumerThread.getFetchedData();
+//        for (ConsumerRecord<String, String> record : records) {
+//            // print the offset,key and value for the consumer records.
+//            System.out.printf("offset = %d, key = %s, value = %s\n",
+//                    record.offset(), record.key(), record.value());
+//        }
     }
+
 }

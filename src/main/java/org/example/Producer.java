@@ -6,24 +6,18 @@ import org.apache.kafka.common.serialization.StringSerializer;
 import java.util.Properties;
 
 public class Producer {
-    private static final KafkaProducer<String, String> producer = createProducer();
+    private  KafkaProducer<String, String> kafkaProducer;
 
-    private Producer() {
-    }
-
-    public static KafkaProducer<String, String> getInstance() {
-        return producer;
-    }
-
-    public void send(){
-
-    }
-
-    private static KafkaProducer<String, String> createProducer() {
+    public Producer() {
         Properties props = new Properties();
-        props.put("bootstrap.servers", Config.BOOTSTRAP_SERVER_IP + ":" + Config.BOOTSTRAP_SERVER_PORT);
+        props.put("bootstrap.servers", "localhost:9092");
         props.put("key.serializer", StringSerializer.class.getName());
         props.put("value.serializer", StringSerializer.class.getName());
-        return new KafkaProducer<>(props);
+
+        kafkaProducer = new KafkaProducer<>(props);
+    }
+
+    public KafkaProducer<String, String> getKafkaProducer() {
+        return kafkaProducer;
     }
 }

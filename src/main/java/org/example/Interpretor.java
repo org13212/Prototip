@@ -18,24 +18,45 @@ public class Interpretor {
 
         switch (comanda){
             case "trimite":
-                String topic = splitString[1];
-                String continut = splitString[2];
-                KafkaProducer<String, String> producer = Producer.getInstance();
-                producer.send(new ProducerRecord<>(topic,null, continut));
-                producer.close();
+                handleTrimite(splitString);
                 break;
             case "afiseaza":
-                String topic2 = splitString[1];
-                KafkaConsumer<String, String> consumer = Consumer.getInstance();
-                consumer.subscribe(Collections.singleton(topic2));
-                ConsumerRecords<String, String> records = consumer.poll(100);
-                for (ConsumerRecord<String, String> record : records)
-                    // print the offset,key and value for the consumer records.
-                    System.out.printf("offset = %d, key = %s, value = %s\n",
-                            record.offset(), record.key(), record.value());
+                handleAfiseaza(splitString);
                 break;
             default:
                 System.out.println("Comanda tastata este invalida.");
+        }
+    }
+
+    private void handleTrimite(String[] splitString){
+        String topic = splitString[1];
+        String continut = splitString[2];
+        KafkaProducer<String, String> producer = Producer.getInstance();
+        producer.send(new ProducerRecord<>(topic,null, continut));
+        producer.flush();
+    }
+
+    private void handleAfiseaza(String[] splitString){
+        String topic = splitString[1];
+        String arg2 = splitString[2];
+
+        KafkaConsumer<String, String> consumer = Consumer.getInstance();
+        //consumer.subscribe(Collections.singleton(topic));
+
+        if (arg2.equals("toate")){
+            consumer.seekToBeginning(consumer.assignment());
+            ConsumerRecords<String, String> records = consumer.poll(1000);
+            for (ConsumerRecord<String, String> record : records)
+                // print the offset,key and value for the consumer records.
+                System.out.printf("offset = %d, key = %s, value = %s\n",
+                        record.offset(), record.key(), record.value());
+        }
+        else {
+            ConsumerRecords<String, String> records = consumer.poll(1000);
+            for (ConsumerRecord<String, String> record : records)
+                // print the offset,key and value for the consumer records.
+                System.out.printf("offset = %d, key = %s, value = %s\n",
+                        record.offset(), record.key(), record.value());
         }
     }
 }

@@ -3,6 +3,7 @@ package org.example;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
+import java.util.Collections;
 import java.util.Properties;
 
 public class Consumer {
@@ -21,6 +22,10 @@ public class Consumer {
         props.put("group.id", "test-group");
         props.put("key.deserializer", StringDeserializer.class.getName());
         props.put("value.deserializer", StringDeserializer.class.getName());
-        return new KafkaConsumer<>(props);
+
+        KafkaConsumer kafkaConsumer = new KafkaConsumer<>(props);
+        kafkaConsumer.subscribe(Collections.singleton("news"));
+
+        return kafkaConsumer;
     }
 }

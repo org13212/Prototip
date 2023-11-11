@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 
 class Main {
+
     public static void main(String[] args) {
         citesteArgumente(args);
 
@@ -17,7 +18,8 @@ class Main {
             interpretor.interpreteaza(sir);
         } while (!sir.equals("bye"));
 
-
+        Producer.getInstance().close();
+        Consumer.getInstance().close();
     }
 
     private static void citesteArgumente(String[] args) {

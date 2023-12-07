@@ -1,30 +1,50 @@
 package org.example;
 
-import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.apache.kafka.common.PartitionInfo;
+import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.protocol.types.Field;
+import org.apache.kafka.common.serialization.StringDeserializer;
 
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
 
-public class Consumer implements Runnable {
-    private final KafkaConsumer<String, String> consumer;
-    private final String topic;
+public class Consumer {
+    private KafkaConsumer<String, String> kafkaConsumer;
 
-    public Consumer(KafkaConsumer<String, String> consumer, String topic) {
-        this.consumer = consumer;
-        this.topic = topic;
+    public Consumer() {
+        Properties props = new Properties();
+        props.put("bootstrap.servers",Config.BOOTSTRAP_SERVERS);
+        props.put("group.id", "test-group");
+        props.put("key.deserializer", StringDeserializer.class.getName());
+        props.put("value.deserializer", StringDeserializer.class.getName());
+        props.put("enable.auto.commit", true);
+        props.put("max.poll.records",10000);
+
+        kafkaConsumer = new KafkaConsumer<>(props);
     }
 
-    @Override
-    public void run() {
-        consumer.subscribe(Collections.singleton(topic));
-        while (true) {
-            ConsumerRecords<String, String> records = consumer.poll(100);
-            for (ConsumerRecord<String, String> record : records)
+    public KafkaConsumer<String, String> getKafkaConsumer() {
+        return kafkaConsumer;
+    }
 
-                // print the offset,key and value for the consumer records.
-                System.out.printf("offset = %d, key = %s, value = %s\n",
-                        record.offset(), record.key(), record.value());
+    public void assignPartitions(ArrayList<String> topics){
+        System.out.println("--- partitii:");
+
+        List<TopicPartition> topicPartitionList = new ArrayList<>();
+
+        for(String topic: topics) {
+            List<PartitionInfo> partitionInfoList = kafkaConsumer.partitionsFor(topic);
+            for (PartitionInfo partitionInfo : partitionInfoList) {
+                System.out.println(partitionInfo);
+                TopicPartition topicPartition = new TopicPartition(partitionInfo.topic(), partitionInfo.partition());
+                topicPartitionList.add(topicPartition);
+            }
         }
+
+        kafkaConsumer.assign(topicPartitionList);
+        System.out.println(kafkaConsumer.assignment());
+        System.out.println("--- ");
     }
 }

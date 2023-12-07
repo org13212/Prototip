@@ -1,43 +1,48 @@
 package org.example;
 
-import java.util.Properties;
+import java.util.Scanner;
 
 
-import org.apache.kafka.clients.producer.*;
-import org.apache.kafka.clients.consumer.*;
-import org.apache.kafka.common.serialization.StringSerializer;
-import org.apache.kafka.common.serialization.StringDeserializer;
+class Main {
 
+    public static void main(String[] args) {
+        citesteArgumente(args);
 
-class Main  {
-    public static void main(String[] args)  {
-        String topicName = "news";
-
-        KafkaProducer<String, String> producer = createProducer();
-        KafkaConsumer<String, String> consumer = createConsumer();
-
-        Thread consumerThread = new Thread(new Consumer(consumer, topicName));
+        Thread consumerThread = new ConsumerThread();
         consumerThread.start();
 
-        Thread producerThread = new Thread(new Producer(producer, topicName));
-        producerThread.start();
+        Scanner scanner = new Scanner(System.in);
+        Interpretor interpretor = new Interpretor();
 
+        String sir = "";
+        do {
+            System.out.print("\n>");
+            sir = scanner.nextLine();
+            interpretor.interpreteaza(sir);
+        } while (!sir.equals("bye"));
+
+        scanner.close();
+        consumerThread.interrupt();
+
+        System.out.println("Final thread principal");
     }
 
-    private static KafkaProducer<String, String> createProducer() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("key.serializer", StringSerializer.class.getName());
-        props.put("value.serializer", StringSerializer.class.getName());
-        return new KafkaProducer<>(props);
-    }
+    private static void citesteArgumente(String[] args) {
+        if (args.length == 0) {
+            System.out.println("No command line arguments provided.");
+            System.exit(-1);
+        } else {
+            /*
+            System.out.println("Command line arguments:");
+            for (int i = 0; i < args.length; i++) {
+                System.out.printf("Argument %d: %s%n", i, args[i]);
+            }
+             */
 
-    private static KafkaConsumer<String, String> createConsumer() {
-        Properties props = new Properties();
-        props.put("bootstrap.servers", "localhost:9092");
-        props.put("group.id", "test-group");
-        props.put("key.deserializer", StringDeserializer.class.getName());
-        props.put("value.deserializer", StringDeserializer.class.getName());
-        return new KafkaConsumer<>(props);
+            Config.BOOTSTRAP_SERVERS.add(args[0]);
+            //Config.BOOTSTRAP_SERVERS.add(args[1]);
+            //Config.BOOTSTRAP_SERVERS.add(args[2]);
+
+        }
     }
 }

@@ -1,28 +1,23 @@
 package org.example;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
-import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 
-import java.util.Scanner;
+import java.util.Properties;
 
-public class Producer implements Runnable {
-    private final KafkaProducer<String,String> producer;
-    private final String topic;
-    public Producer(KafkaProducer<String,String> producer,String topic){
-        this.producer=producer;
-        this.topic=topic;
+public class Producer {
+    private  KafkaProducer<String, String> kafkaProducer;
+
+    public Producer() {
+        Properties props = new Properties();
+        props.put("bootstrap.servers", Config.BOOTSTRAP_SERVERS);
+        props.put("key.serializer", StringSerializer.class.getName());
+        props.put("value.serializer", StringSerializer.class.getName());
+
+        kafkaProducer = new KafkaProducer<>(props);
     }
-    @Override
-    public void run() {
 
-        System.out.println("A message on the curent topic:");
-        Scanner messageScanner=new Scanner(System.in);
-        String message=messageScanner.nextLine();
-
-        producer.send(new ProducerRecord<>(topic,null,message));
-        producer.close();
-
-
-
+    public KafkaProducer<String, String> getKafkaProducer() {
+        return kafkaProducer;
     }
 }

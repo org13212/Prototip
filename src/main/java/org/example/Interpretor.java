@@ -6,6 +6,8 @@ import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class Interpretor {
@@ -19,16 +21,16 @@ public class Interpretor {
 
         switch (comanda) {
             case "trimite":
-                handleTrimite(splitString);
+                handleLogg(handleTrimite(splitString));
                 break;
             case "afiseaza":
-                handleAfiseaza(splitString);
+                handleLogg(handleAfiseaza(splitString));
                 break;
             case "aboneaza":
-                handleAboneaza(splitString);
+                handleLogg(handleAboneaza(splitString));
                 break;
             case "dezaboneaza":
-                handleDezaboneaza(splitString);
+                handleLogg(handleDezaboneaza(splitString));
                 break;
             //case "sterge":
             //handleStergeTopic(splitString);
@@ -65,13 +67,21 @@ public class Interpretor {
         kafkaProducer.close();
     }
 
-    private void handleTrimite(String[] splitString) {
+    private String handleTrimite(String[] splitString) {
         String topic = splitString[1];
         String continut = splitString[2];
+        CreazaSiTrimitePeTopic(topic,continut);
+        return getTimeStamp()+" Mesajul '"+continut+"' a fost trimis pe topicul '"+topic+"'";
+    }
+private void handleLogg(String logg){
+        //  codul comentat de la L121:L123 are rolul de a opri crearea
+        //  unei inregistrari in logg la afisarea loggului(handleAfisare) impreuna cu linia urmatoare de cod
+        if(!logg.equals(""))
+        CreazaSiTrimitePeTopic("logg",logg);
+}
+private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         Producer producer = new Producer();
         KafkaProducer<String, String> kafkaProducer = producer.getKafkaProducer();
-
-        // Daca topicul nu exista atunci este creat imediat
         if (!TopicChecker.topicExists(Config.BOOTSTRAP_SERVERS, topic)) {
             TopicBuilder topicBuilder = new TopicBuilder.Builder(topic)
                     .partitions(1)
@@ -80,21 +90,20 @@ public class Interpretor {
             topicBuilder.createTopic();
         }
 
-        kafkaProducer.send(new ProducerRecord<>(topic, null, continut));
+        kafkaProducer.send(new ProducerRecord<>(topic, null, mesaj));
         kafkaProducer.flush();
         kafkaProducer.close();
-    }
-
-    private void handleAfiseaza(String[] splitString) {
+}
+    private String handleAfiseaza(String[] splitString) {
         if (splitString[1].equals("abonamente")) {
             afiseazaAbonamente();
-            return;
+            return getTimeStamp()+" Un utilizator a vizualizat lista de abonamente";
         }
 
         if (splitString[1].equals("recente")) {
             afiseazaRecords(ConsumerThread.getFetchedData());
             ConsumerThread.clearBuffer();
-            return;
+            return getTimeStamp()+"Un utilizator a verificat noutatile abonamentelor";
         }
 
         ArrayList<String> topics = new ArrayList<>();
@@ -109,14 +118,20 @@ public class Interpretor {
         afiseazaRecords(kafkaConsumer.poll(Duration.ofMillis(1000)));
 
         kafkaConsumer.close();
+        if(splitString[1].equals("logg"))
+            return "";
+        else
+            return getTimeStamp()+" Un utilizator a vizualizat topicul '"+splitString[1]+"'";
     }
 
-    private void handleAboneaza(String[] splitString) {
+    private String handleAboneaza(String[] splitString) {
         ConsumerThread.addSubscribedTopic(splitString[1]);
+        return getTimeStamp()+" Un utilizator s-a abonat la topicul '"+splitString[1]+"'";
     }
 
-    private void handleDezaboneaza(String[] splitString) {
+    private String handleDezaboneaza(String[] splitString) {
         ConsumerThread.removeSubscribedTopic(splitString[1]);
+        return getTimeStamp()+" Un utilizator s-a dezabonat de la topicul '"+splitString[1]+"'";
     }
 
 // STERGERE TOPIC
@@ -154,5 +169,9 @@ public class Interpretor {
         System.out.println("--- abonamente:");
         System.out.println(ConsumerThread.getSubscribedTopics());
         System.out.println("---");
+    }
+    private String getTimeStamp(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd-HH:mm:ss.SSS");
+        return dtf.format(LocalDateTime.now());
     }
 }

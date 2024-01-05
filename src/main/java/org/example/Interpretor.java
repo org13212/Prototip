@@ -50,8 +50,8 @@ public class Interpretor {
 
         if (!TopicChecker.topicExists(Config.BOOTSTRAP_SERVERS, topic)) {
             TopicBuilder topicBuilder = new TopicBuilder.Builder(topic)
-                    .partitions(1)
-                    .replicationFactor((short) 1)
+                    .partitions(Config.numPartitionsOfTopic)
+                    .replicationFactor(Config.replicationFactor)
                     .build();
             topicBuilder.createTopic();
         }
@@ -74,18 +74,19 @@ public class Interpretor {
         return getTimeStamp()+" Mesajul '"+continut+"' a fost trimis pe topicul '"+topic+"'";
     }
 private void handleLogg(String logg){
-        //  codul comentat de la L121:L123 are rolul de a opri crearea
+        //  codul comentat de la L122:L126 are rolul de a opri crearea
         //  unei inregistrari in logg la afisarea loggului(handleAfisare) impreuna cu linia urmatoare de cod
-        if(!logg.equals(""))
-        CreazaSiTrimitePeTopic("logg",logg);
+        if(!logg.equals("")) {
+            CreazaSiTrimitePeTopic("logg", logg);
+        }
 }
 private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         Producer producer = new Producer();
         KafkaProducer<String, String> kafkaProducer = producer.getKafkaProducer();
         if (!TopicChecker.topicExists(Config.BOOTSTRAP_SERVERS, topic)) {
             TopicBuilder topicBuilder = new TopicBuilder.Builder(topic)
-                    .partitions(1)
-                    .replicationFactor((short) 1)
+                    .partitions(Config.numPartitionsOfTopic)
+                    .replicationFactor(Config.replicationFactor)
                     .build();
             topicBuilder.createTopic();
         }
@@ -118,10 +119,12 @@ private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         afiseazaRecords(kafkaConsumer.poll(Duration.ofMillis(1000)));
 
         kafkaConsumer.close();
-        if(splitString[1].equals("logg"))
+        if(splitString[1].equals("logg")) {
             return "";
-        else
-            return getTimeStamp()+" Un utilizator a vizualizat topicul '"+splitString[1]+"'";
+        }
+        else {
+            return getTimeStamp() + " Un utilizator a vizualizat topicul '" + splitString[1] + "'";
+        }
     }
 
     private String handleAboneaza(String[] splitString) {

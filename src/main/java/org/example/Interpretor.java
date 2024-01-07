@@ -50,8 +50,8 @@ public class Interpretor {
 
         if (!TopicChecker.topicExists(Config.BOOTSTRAP_SERVERS, topic)) {
             TopicBuilder topicBuilder = new TopicBuilder.Builder(topic)
-                    .partitions(1)
-                    .replicationFactor((short) 1)
+                    .partitions(Config.numPartitionsOfTopic)
+                    .replicationFactor(Config.replicationFactor)
                     .build();
             topicBuilder.createTopic();
         }
@@ -62,7 +62,6 @@ public class Interpretor {
             kafkaProducer.send(new ProducerRecord<>(topic, null, String.valueOf(i)));
             i++;
         }
-
         kafkaProducer.flush();
         kafkaProducer.close();
     }
@@ -71,21 +70,19 @@ public class Interpretor {
         String topic = splitString[1];
         String continut = splitString[2];
         CreazaSiTrimitePeTopic(topic,continut);
-        return getTimeStamp()+" Mesajul '"+continut+"' a fost trimis pe topicul '"+topic+"'";
+        return getTimeStamp()+" UserID:'"+Config.CLIENT_ID_CONFIG+"' Mesajul '"+continut+"' a fost trimis pe topicul '"+topic+"'";
     }
-private void handleLogg(String logg){
-        //  codul comentat de la L121:L123 are rolul de a opri crearea
-        //  unei inregistrari in logg la afisarea loggului(handleAfisare) impreuna cu linia urmatoare de cod
+    private void handleLogg(String logg){
         if(!logg.equals(""))
-        CreazaSiTrimitePeTopic("logg",logg);
-}
+            CreazaSiTrimitePeTopic("logg",logg);
+    }
 private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         Producer producer = new Producer();
         KafkaProducer<String, String> kafkaProducer = producer.getKafkaProducer();
         if (!TopicChecker.topicExists(Config.BOOTSTRAP_SERVERS, topic)) {
             TopicBuilder topicBuilder = new TopicBuilder.Builder(topic)
-                    .partitions(1)
-                    .replicationFactor((short) 1)
+                    .partitions(Config.numPartitionsOfTopic)
+                    .replicationFactor(Config.replicationFactor)
                     .build();
             topicBuilder.createTopic();
         }
@@ -93,17 +90,17 @@ private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         kafkaProducer.send(new ProducerRecord<>(topic, null, mesaj));
         kafkaProducer.flush();
         kafkaProducer.close();
-}
+    }
     private String handleAfiseaza(String[] splitString) {
         if (splitString[1].equals("abonamente")) {
             afiseazaAbonamente();
-            return getTimeStamp()+" Un utilizator a vizualizat lista de abonamente";
+            return getTimeStamp()+" Utilizatorul cu idul:'"+Config.CLIENT_ID_CONFIG+"' a vizualizat lista de abonamente";
         }
 
         if (splitString[1].equals("recente")) {
             afiseazaRecords(ConsumerThread.getFetchedData());
             ConsumerThread.clearBuffer();
-            return getTimeStamp()+"Un utilizator a verificat noutatile abonamentelor";
+            return getTimeStamp()+" Utilizatorul cu idul:'"+Config.CLIENT_ID_CONFIG+"' a verificat noutatile abonamentelor";
         }
 
         ArrayList<String> topics = new ArrayList<>();
@@ -120,18 +117,19 @@ private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         kafkaConsumer.close();
         if(splitString[1].equals("logg"))
             return "";
-        else
-            return getTimeStamp()+" Un utilizator a vizualizat topicul '"+splitString[1]+"'";
+        else 
+            return getTimeStamp() + " Utilizatorul cu idul:'"+Config.CLIENT_ID_CONFIG+"' a vizualizat topicul '" + splitString[1] + "'";
+   
     }
 
     private String handleAboneaza(String[] splitString) {
         ConsumerThread.addSubscribedTopic(splitString[1]);
-        return getTimeStamp()+" Un utilizator s-a abonat la topicul '"+splitString[1]+"'";
+        return getTimeStamp()+" Utilizatorul cu idul:'"+Config.CLIENT_ID_CONFIG+"' s-a abonat la topicul '"+splitString[1]+"'";
     }
 
     private String handleDezaboneaza(String[] splitString) {
         ConsumerThread.removeSubscribedTopic(splitString[1]);
-        return getTimeStamp()+" Un utilizator s-a dezabonat de la topicul '"+splitString[1]+"'";
+        return getTimeStamp()+" Utilizatorul cu idul:'"+Config.CLIENT_ID_CONFIG+"' s-a dezabonat de la topicul '"+splitString[1]+"'";
     }
 
 // STERGERE TOPIC

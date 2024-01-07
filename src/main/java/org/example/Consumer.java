@@ -1,5 +1,6 @@
 package org.example;
 
+import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
@@ -9,9 +10,11 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 
 public class Consumer {
     private KafkaConsumer<String, String> kafkaConsumer;
+
 
     public Consumer() {
         Properties props = new Properties();
@@ -21,14 +24,15 @@ public class Consumer {
         props.put("value.deserializer", StringDeserializer.class.getName());
         props.put("enable.auto.commit", true);
         props.put("max.poll.records",10000);
+        props.put("client.id",Config.CLIENT_ID_CONFIG);
 
         kafkaConsumer = new KafkaConsumer<>(props);
+
     }
 
     public KafkaConsumer<String, String> getKafkaConsumer() {
         return kafkaConsumer;
     }
-
     public void assignPartitions(ArrayList<String> topics){
         System.out.println("--- partitii:");
 

@@ -9,7 +9,6 @@ public class ConsumerThread extends Thread {
     private static ArrayList<String> subscribedTopics = new ArrayList<>();
     private static ArrayList<ConsumerRecord<String, String>> buffer = new ArrayList<>();
     private static boolean subscribedTopicsChangedFlag = false;
-
     @Override
     public void run() {
 
@@ -45,6 +44,7 @@ public class ConsumerThread extends Thread {
     public static void clearBuffer() {
         buffer.clear();
     }
+
 
     public static void addSubscribedTopic(String topic) {
         subscribedTopics.add(topic);

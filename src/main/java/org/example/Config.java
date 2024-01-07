@@ -13,7 +13,8 @@ public class Config {
     public static short replicationFactor = 1;
 
     public static int numPartitionsOfTopic = 1;
-    public static String CLIENT_ID_CONFIG= UUID.randomUUID().toString();
+
     private Config() {
     }
 }
+

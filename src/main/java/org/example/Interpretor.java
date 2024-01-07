@@ -72,10 +72,12 @@ public class Interpretor {
         CreazaSiTrimitePeTopic(topic,continut);
         return getTimeStamp()+" UserID:'"+Config.CLIENT_ID_CONFIG+"' Mesajul '"+continut+"' a fost trimis pe topicul '"+topic+"'";
     }
+
     private void handleLogg(String logg){
         if(!logg.equals(""))
             CreazaSiTrimitePeTopic("logg",logg);
-    }
+}
+
 private void CreazaSiTrimitePeTopic(String topic,String mesaj){
         Producer producer = new Producer();
         KafkaProducer<String, String> kafkaProducer = producer.getKafkaProducer();
@@ -119,7 +121,7 @@ private void CreazaSiTrimitePeTopic(String topic,String mesaj){
             return "";
         else 
             return getTimeStamp() + " Utilizatorul cu idul:'"+Config.CLIENT_ID_CONFIG+"' a vizualizat topicul '" + splitString[1] + "'";
-   
+  
     }
 
     private String handleAboneaza(String[] splitString) {
